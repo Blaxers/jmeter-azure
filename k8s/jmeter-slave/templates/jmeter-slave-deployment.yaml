@@ -1,0 +1,58 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  annotations:
+    cluster-autoscaler.kubernetes.io/safe-to-evict: "false"
+  name: {{ template "jmeter-slave.fullname" . }}-server
+  labels:
+    app.kubernetes.io/name: {{ include "jmeter-slave.name" . }}
+    helm.sh/chart: {{ include "jmeter-slave.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: jmeter-slave
+spec:
+  replicas: {{ .Values.pod.replicaCount }}
+  strategy:
+    type: RollingUpdate
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "jmeter-slave.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: jmeter-slave
+  template:
+    metadata:
+      annotations:
+        "cluster-autoscaler.kubernetes.io/safe-to-evict": "false"
+      labels:
+        app.kubernetes.io/name: {{ include "jmeter-slave.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: jmeter-slave
+    spec:
+      #      imagePullSecrets:
+      #        - name: dockerregcred
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: "{{ .Values.image.pullPolicy }}"
+          resources:
+            limits:
+              memory: "{{ .Values.resources.limits.memory }}"
+              cpu: "{{ .Values.resources.limits.cpu }}"
+            requests:
+              memory: "{{ .Values.resources.requests.memory }}"
+              cpu: "{{ .Values.resources.requests.cpu }}"
+
+          env:
+            - name: MODE
+              value: "{{ .Values.mode }}"
+#            - name: JAVA_ARG
+#              value: "{{ join " " .Values.javaArgs }}"
+          #command: ["/docker-entrypoint.sh"]
+          args:
+            - "{{ .Values.mode }}"
+            {{- range .Values.javaArgs }}
+            - "{{ . }}"
+            {{- end }}
+ports:
+  - containerPort: 50000
+  - containerPort: 1099
