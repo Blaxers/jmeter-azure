@@ -3,20 +3,22 @@
 # POD related configuration
 pod:
   # The number of JMeter slave pods required
-  replicaCount: 2
+  replicaCount: 1
 
 # POD resource configuration
 resources:
   limits:
-    cpu: 500m
-    memory: 2560Mi
-  requests:
-    cpu: 300m
+    cpu: 1024m
     memory: 2048Mi
+  requests:
+    cpu: 1024m
+    memory: 512Mi
 
 # POD image configuration
+#ghcr.io/blaxers/jmeter-slave-jdk17:5.6.3
+#ghcr.io/blaxers/jmeter-slave/jmeter-slave-jdk17:5.6.3
 image:
-  repository: ghcr.io/blaxers/jmeter-slave-jdk17
+  repository: ghcr.io/blaxers/jmeter-slave/jmeter-slave-jdk17
   tag: 5.6.3
   pullPolicy: Always
   #pullPolicy: IfNotPresent
@@ -25,8 +27,9 @@ image:
 mode: "slave-mode"
 
 javaArgs:
-  - "-Xms1536M"
+  - "-Xms1024M"
   - "-Xmx2048M"
-  - "-Dserver.rmi.localport=1099"
+  - "-Dserver.rmi.localport=50000"
   - "-Dserver_port=1099"
   - "-Dserver.rmi.ssl.disable=true"
+  - "-Djava.rmi.server.hostname=jmeter-slave-server-0.jmeter-slave-headless.jmeter.svc.cluster.local"

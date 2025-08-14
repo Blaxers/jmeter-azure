@@ -1,0 +1,20 @@
+apiVersion: v1
+kind: Service
+metadata:
+  name: {{ template "jmeter-slave.fullname" . }}-headless
+  labels:
+    app.kubernetes.io/name: {{ include "jmeter-slave.name" . }}
+    helm.sh/chart: {{ include "jmeter-slave.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+spec:
+  clusterIP: None     # to kluczowe — headless service ma None
+  selector:
+    app.kubernetes.io/name: {{ include "jmeter-slave.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/component: jmeter-slave
+  ports:
+    - name: jmeter-agent
+      port: 50000
+    - name: jmeter-rmi
+      port: 1099

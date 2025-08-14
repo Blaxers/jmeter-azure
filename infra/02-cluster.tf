@@ -7,8 +7,8 @@ resource "azurerm_kubernetes_cluster" "example" {
   default_node_pool {
     name       = "default"
     node_count = 1
-    vm_size    = "Standard_B2ms"
-    #Standard_B2ms
+    vm_size    = "Standard_B4ms"
+    #Standard_B2ms https://learn.microsoft.com/pl-pl/azure/virtual-machines/sizes/general-purpose/bv1-series?tabs=sizebasic
   }
 
   identity {

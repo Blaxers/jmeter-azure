@@ -1,0 +1,44 @@
+apiVersion: apps/v1
+kind: StatefulSet
+metadata:
+  name: {{ template "jmeter-slave.fullname" . }}-server
+  labels:
+    app.kubernetes.io/name: {{ include "jmeter-slave.name" . }}
+    helm.sh/chart: {{ include "jmeter-slave.chart" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}
+    app.kubernetes.io/managed-by: {{ .Release.Service }}
+    app.kubernetes.io/component: jmeter-slave
+spec:
+  serviceName: {{ template "jmeter-slave.fullname" . }}-headless
+  replicas: {{ .Values.pod.replicaCount }}
+  selector:
+    matchLabels:
+      app.kubernetes.io/name: {{ include "jmeter-slave.name" . }}
+      app.kubernetes.io/instance: {{ .Release.Name }}
+      app.kubernetes.io/component: jmeter-slave
+  template:
+    metadata:
+      labels:
+        app.kubernetes.io/name: {{ include "jmeter-slave.name" . }}
+        app.kubernetes.io/instance: {{ .Release.Name }}
+        app.kubernetes.io/component: jmeter-slave
+    spec:
+      containers:
+        - name: {{ .Chart.Name }}
+          image: "{{ .Values.image.repository }}:{{ .Values.image.tag }}"
+          imagePullPolicy: {{ .Values.image.pullPolicy | quote }}
+          ports:
+            - containerPort: 50000
+              name: jmeter-agent
+            - containerPort: 1099
+              name: jmeter-rmi
+          env:
+            - name: MODE
+              value: {{ .Values.mode | quote }}
+          args:
+            - {{ .Values.mode | quote }}
+            {{- range .Values.javaArgs }}
+            - {{ . | quote }}
+            {{- end }}
+          resources:
+            {{- toYaml .Values.resources | nindent 12 }}
